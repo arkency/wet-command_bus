@@ -13,7 +13,12 @@ module Arkency
 
     def register(klass, handler)
       raise MultipleHandlers.new("Multiple handlers not allowed for #{klass}") if handlers[klass]
-      handlers[klass] = handler
+
+      if handler.respond_to?(:call)
+        handlers[klass] = handler
+      else
+        handlers[klass] = -> (command) { handler.new.call(command) }
+      end
     end
 
     def call(command)
